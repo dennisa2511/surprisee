@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Salvează-ți telefonul!</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --accent:#ff4c4c;
+    --card:#ffffff;
+  }
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{
+    /* FUNDALUL SCHIMBAT ÎN ROZ */
+    background: radial-gradient(circle at 20% 20%, #ffc0cb 0%, #ff8fab 40%, #ff69b4 100%);
+    color:#3b003b;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+
+  .container{max-width:900px;width:100%;text-align:center;}
+  h1{font-size:2rem;margin:0 0 12px;}
+  p.lead{opacity:0.9;margin:0 0 18px;}
+
+  .big-btn{
+    display:inline-block;
+    background:linear-gradient(180deg,#ff6b6b,#ff3b3b);
+    color:white;
+    padding:18px 28px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:1.1rem;
+    cursor:pointer;
+    border:none;
+    box-shadow:0 6px 20px rgba(255,60,60,0.25);
+    transition:transform .12s ease;
+  }
+  .big-btn:active{transform:translateY(2px) scale(.995);}
+
+  /* Scare overlay */
+  .scare-overlay{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.7);z-index:50;flex-direction:column;backdrop-filter:blur(2px);
+    opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  .scare-overlay.show{opacity:1;pointer-events:auto;}
+  .flash{
+    position:absolute;inset:0;background:var(--accent);mix-blend-mode:screen;opacity:0;animation:flashAnim .9s ease forwards;
+  }
+  @keyframes flashAnim{
+    0%{opacity:0}
+    10%{opacity:1}
+    60%{opacity:0.6}
+    100%{opacity:0}
+  }
+  .scare-card{
+    transform:translateY(-8px);
+    color:white;padding:28px;border-radius:18px;text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    border:3px solid rgba(255,255,255,0.06);
+  }
+  .scare-title{font-size:2.2rem;font-weight:800;margin:0 0 6px;}
+  .scare-sub{opacity:0.95;margin:6px 0 0;font-weight:600;}
+
+  /* Invite card */
+  .invite-wrap{
+    max-width:860px;margin:24px auto 0;
+    background:linear-gradient(180deg,#ffffff,#ffe6f0);
+    color:#571c3a;border-radius:14px;padding:20px;
+    box-shadow:0 12px 40px rgba(88,0,44,0.3);
+  }
+  .invite-grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:center;}
+  @media (max-width:760px){ .invite-grid{grid-template-columns:1fr;}}
+  .invite-content h2{margin:0;font-size:1.6rem;}
+  .invite-content p{margin:8px 0 0;color:#733b5b;}
+  .invite-image{width:100%;height:100%;max-height:320px;overflow:hidden;border-radius:10px;border:1px solid rgba(7,18,39,0.06);}
+  .invite-image img{width:100%;height:100%;object-fit:cover;display:block;}
+
+  .close-btn{
+    display:inline-block;margin-top:12px;padding:10px 14px;border-radius:10px;
+    background:#ff69b4;color:white;font-weight:700;border:none;cursor:pointer;
+  }
+  footer.note{margin-top:14px;color:#9aa8c6;font-size:.9rem;}
+  .fallback-link { margin-top:8px; display:inline-block; color:#ff1493; text-decoration:none; font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚠️ ALERTĂ: Bateria ta e pe terminate!</h1>
+    <p class="lead">Telefonul tău riscă să explodeze! Apasă aici imediat să-ți salvezi telefonul.</p>
+    <button class="big-btn" id="saveBtn">Apasă aici ca să-ți salvezi telefonul!</button>
+
+    <div class="invite-wrap" id="invite" style="display:none">
+      <div class="invite-grid">
+        <div class="invite-content">
+          <h2>🩷Ești invitată la ziua mea de naștere!🩷</h2>
+          <p>Data: <strong>Sâmbătă, 29 noiembrie 2025</strong><br>Locație: Strada Constantin Dobrogeanu-Gherea 86 (îți las mai multe detalii în privat)</p>
+          <p style="margin-top:12px">Abia aștept să sărbătorim împreună! Nu uita să vii cu chef de partyy, de restul mă ocup eu!! 💕💕</p>
+          <button class="close-btn" id="closeInvite">Închide</button>
+          <div class="note" style="margin-top:10px;color:#6b7a92;font-size:.93rem;">P.S. Sper că nu te-am speriat, kisses ✨</div>
+        </div>
+        <div class="invite-image" id="inviteImage">
+          <img id="canvaImg" src="imagini/Invitatie.png" alt="Invitație - poza ta de pe Canva" onerror="this.style.display='none'">
+          <a class="fallback-link" href="https://www.canva.com/design/DAG4Jb0eut0/fo5PWX8yhly3O3EkmUgC5w/edit?utm_content=DAG4Jb0eut0&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" target="_blank" rel="noopener noreferrer">Deschide imaginea în Canva (fallback)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- overlay scare -->
+  <div class="scare-overlay" id="scareOverlay" aria-hidden="true">
+    <div class="flash" aria-hidden="true"></div>
+    <div class="scare-card" role="dialog" aria-labelledby="scareTitle">
+      <div class="scare-title" id="scareTitle">⚠️ URGENT!</div>
+      <div class="scare-sub">Dacă nu apeși acum, telefonul se va SUPRAÎNCĂLZI!</div>
+    </div>
+  </div>
+
+<script>
+  const btn = document.getElementById('saveBtn');
+  const overlay = document.getElementById('scareOverlay');
+  const invite = document.getElementById('invite');
+  const closeInvite = document.getElementById('closeInvite');
+
+  function scareSequence(){
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden','false');
+
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(880, ctx.currentTime);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.7, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.38);
+    } catch (e) { console.warn('Audio failed:', e); }
+
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+      showInvite();
+    }, 900);
+  }
+
+  function showInvite(){
+    invite.style.display = 'block';
+    invite.scrollIntoView({behavior:'smooth',block:'center'});
+    invite.animate([
+      { transform: 'scale(.98)', opacity: 0.9 },
+      { transform: 'scale(1)', opacity: 1 }
+    ], { duration: 350, easing: 'cubic-bezier(.16,.86,.28,1)'});
+  }
+
+  btn.addEventListener('click', (e)=>{
+    e.currentTarget.disabled = true;
+    e.currentTarget.innerText = 'Procesare...';
+    setTimeout(scareSequence, 700);
+  });
+
+  closeInvite.addEventListener('click', ()=> {
+    invite.style.display = 'none';
+    btn.disabled = false;
+    btn.innerText = 'Apasă aici ca să-ți salvezi telefonul!';
+  });
+
+  btn.addEventListener('keyup', (ev)=>{ if(ev.key === 'Enter') btn.click(); });
+</script>
+</body>
+</html>
